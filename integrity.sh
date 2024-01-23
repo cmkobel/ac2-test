@@ -3,6 +3,7 @@
 set -euo pipefail
 set -x
 
+[ -d results_ac2 ] && /usr/bin/rm -r results_ac2 || exit 1
 
 
 which mamba
@@ -18,7 +19,7 @@ du -sh ~/.asscom2
 
 # Install ac2
 
-#mamba create -y -c conda-forge -c bioconda -n asscom2_test assemblycomparator2=2.5.14 # TODO set to patch17
+mamba create -y -c conda-forge -c bioconda -n asscom2_test assemblycomparator2=2.5.14 # TODO set to patch17
 
 source activate asscom2_test
 
