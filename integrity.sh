@@ -3,6 +3,9 @@
 set -euo pipefail
 set -x
 
+# TODO: Must also test the downloads. Maybe in a separate script?
+
+
 # Clean up potential old outputs.
 [ -d results_ac2 ] && /usr/bin/rm -r results_ac2
 [ -d scripts_temporary ] && /usr/bin/rm -r scripts_temporary
