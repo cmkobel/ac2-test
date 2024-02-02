@@ -36,12 +36,17 @@ cp $CONDA_PREFIX/assemblycomparator2/tests/MAGs/*.fasta .
 
 
 # Run comprehensive?? test
-asscom2 --until fast
+asscom2 --cores 32
 
 exit_code=$?
 
 echo $exit_code
 
 
+<<<<<<< HEAD
 # Assert that outputs are corret
 exit $exit_code
+=======
+# Assert that outputs are correct
+exit $exit_code
+>>>>>>> f1fa341 (getting started)

@@ -1,0 +1,7 @@
+name: ac2-test
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - mamba
+  - snakemake=7.32.4 # Last version before they completely changed the structure.
