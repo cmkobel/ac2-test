@@ -43,10 +43,5 @@ exit_code=$?
 echo $exit_code
 
 
-<<<<<<< HEAD
-# Assert that outputs are corret
-exit $exit_code
-=======
 # Assert that outputs are correct
 exit $exit_code
->>>>>>> f1fa341 (getting started)
