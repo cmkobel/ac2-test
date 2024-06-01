@@ -23,6 +23,8 @@
 # 3) Apptainer master (release candidate)
 
 
+report_dir = "~/PhD/19_asscom2_MS/CI_reports"
+
 
 ruleorder: r13_run_staticdb > r142_run # Because r13 is quicker.
 
@@ -253,8 +255,17 @@ rule r22_run:
     """
 
 
-# In case r12 fails we should set it back to strict.
+
+
+# Until I implement some smart email service this is the solution.
+onsuccess:
+    shell: f"""
+        rm {report_dir}/ERROR.flag
+        touch {report_dir}/SUCCESS.flag
+    """
+    
 onerror:
-    shell: """
-        conda config --set channel_priority strict
+    shell: f"""
+        touch {report_dir}/ERROR.flag
+        rm {report_dir}/SUCCESS.flag
     """
