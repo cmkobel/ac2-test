@@ -7,7 +7,7 @@
 
 
 # 1) Conda latest 
-# r11_latest_download             Clones git repo latest
+# r11_download_latest             Clones git repo latest
 # r12_install           Runs mamba to install fresh environments into conda_prefix
 # r13_run_staticdb      Full test on static database
 # r141_database          Download databases into new dir and ...
@@ -38,7 +38,7 @@ rule all:
 
 # Downloads the latest commit
 # consider purging ~/.asscom2/conda if you want to test reinstallation from .yamls.
-rule r11_latest_download:
+rule r11_download_latest:
     output: 
         touch("out/1_latest_conda/11_done.flag"),
         "out/1_latest_conda/assemblycomparator2-master/asscom2"
@@ -68,7 +68,7 @@ rule r12_install:
     shell: """
     
         # Save 
-        fnas=$(realpath fnas)
+        fnas=$(realpath fnas/E._faecium_4)
         set_conda_prefix="$(pwd -P)/static_conda_prefix"
         
         # Enter the dir where we just downloaded latest 
@@ -108,7 +108,7 @@ rule r13_run_staticdb:
     shell: """
     
         # Save 
-        fnas=$(realpath fnas)
+        fnas=$(realpath fnas/E._faecium_4)
         set_conda_prefix="$(pwd -P)/static_conda_prefix"
         
         # Enter the dir where we just downloaded latest 
@@ -122,6 +122,7 @@ rule r13_run_staticdb:
         #export ASSCOM2_BASE="$(realpath ~/asscom2)"
         export ASSCOM2_PROFILE="${{ASSCOM2_BASE}}/profile/conda/default"
         ${{ASSCOM2_BASE}}/asscom2 \
+            --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
         --conda-prefix $set_conda_prefix 
