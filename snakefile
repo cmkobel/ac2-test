@@ -128,6 +128,17 @@ rule r13_run_staticdb:
             --config \
                 input_genomes="${{fnas}}/*.fna" \
         --conda-prefix $set_conda_prefix 
+            
+            
+        # dry run
+        # A dry run is an easy way to show what failed.
+        export ASSCOM2_PROFILE="${{ASSCOM2_BASE}}/profile/conda/default"
+        ${{ASSCOM2_BASE}}/asscom2 \
+            --cores {threads} \
+            --config \
+                input_genomes="${{fnas}}/*.fna" \
+        --conda-prefix $set_conda_prefix \
+            --dry-run
 
     """
 
