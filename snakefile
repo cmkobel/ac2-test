@@ -56,8 +56,7 @@ rule r1_latest_reuse:
         ./asscom2 \
             --cores {threads} \
             --config \
-                input_genomes="${{fnas}}/*.fna" \
-        --until fast 
+                input_genomes="${{fnas}}/*.fna"
         
     """
 
