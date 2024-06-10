@@ -126,12 +126,19 @@ rule r3_conda_stable:
         #mkdir -p {output.dir}/dynamic_db_stable
         #export ASSCOM2_DATABASES="$(realpath {output.dir}/dynamic_db_stable)"
         
+        # Set up variables. 
+        mkdir -p {output.dir}/conda_prefix
+        set_conda_prefix=$(realpath {output.dir}/conda_prefix)
+        mkdir -p {output.dir}/db
+        export ASSCOM2_DATABASES="$(realpath {output.dir}/db)"
+        
         export ASSCOM2_PROFILE="$(dirname $(realpath $(which asscom2)))/profile/conda/default"
         asscom2 \
             --cores {threads} \
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
-                output_directory="{output.dir}"
+                output_directory="{output.dir}" \
+            --conda-prefix $set_conda_prefix
     
     """
     
