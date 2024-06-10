@@ -46,7 +46,7 @@ rule r1_latest_reuse:
         
         # Install environment.
         mamba env create -y -f environment.yaml -n ac2_ci_conda_latest_reuse
-        source activate ac2_ci_conda_latest
+        source activate ac2_ci_conda_latest_reuse
 
 
         export ASSCOM2_PROFILE="$(realpath profile/conda/default)"
