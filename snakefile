@@ -23,7 +23,7 @@ rule all:
 rule r1_latest_reuse:
     output:
         touch("1_done.flag"),
-        log = "out/1_latest_reuse/log.txt"
+        log = "out/1_latest_reuse/log.txt",
         dir = directory("out/1_latest_reuse")
     threads: 16
     shell: """
