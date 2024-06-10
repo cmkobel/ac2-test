@@ -170,17 +170,21 @@ rule r4_apptainer:
         dir = directory("out/4_apptainer")
     shell: """
     
+        # Make sure that apptainer exists for this test.
         apptainer --version
-    
         
+        # Create conda environment.
         mamba create -y -c conda-forge -c bioconda -n ac2_ci_apptainer assemblycomparator2
         source activate ac2_ci_apptainer
         
-        # Let's use the static db for now (debugging)
+        # Set up db
         mkdir -p {output.dir}/db
         export ASSCOM2_DATABASES=$(realpath {output.dir}/db)
 
         export ASSCOM2_PROFILE="$(dirname $(realpath $(which asscom2)))/profile/apptainer/default"
+        which asscom2 
+        asscom2 --version
+        sleep 10
         asscom2 \
             --cores {threads} \
             --config \
