@@ -23,6 +23,7 @@ rule all:
 rule r1_latest_reuse:
     output:
         touch("1_done.flag"),
+        log = "out/1_latest_reuse/log.txt"
         dir = directory("out/1_latest_reuse")
     threads: 16
     shell: """
@@ -56,7 +57,8 @@ rule r1_latest_reuse:
         ./asscom2 \
             --cores {threads} \
             --config \
-                input_genomes="${{fnas}}/*.fna"
+                input_genomes="${{fnas}}/*.fna" \
+        | tee log.txt
         
     """
 
