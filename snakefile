@@ -58,7 +58,7 @@ rule r1_latest_reuse:
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
-        | tee log.txt
+        | tee -a log.txt
         
     """
 
