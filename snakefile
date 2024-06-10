@@ -27,274 +27,166 @@
 report_dir = "~/PhD/19_asscom2_MS/CI_reports"
 
 
-ruleorder: r13_run_staticdb > r142_run # Because r13 is quicker.
-
 
 
 rule all:
     input: 
         "1_done.flag",    
-        "2_done.flag"
-
-
-
-
-# Downloads the latest commit
-# consider purging ~/.asscom2/conda if you want to test reinstallation from .yamls.
-rule r11_download_latest:
-    output: 
-        touch("out/1_latest_conda/11_done.flag"),
-        "out/1_latest_conda/assemblycomparator2-master/asscom2"
-    shell: """
-
-        # Always print versions of any dependencies outside ac2 in the start.
-
-        mamba --version
+        "2_done.flag",
+        "3_done.flag",
+        "4_done.flag"
         
-        # Purge previous results
-        rm -r out/1_latest_conda/*
-        
-        # Download latest
-        wget --continue -O out/1_latest_conda/master.zip https://github.com/cmkobel/assemblycomparator2/archive/refs/heads/master.zip
-        unzip -d out/1_latest_conda out/1_latest_conda/master.zip 
-        #cd out/1_latest_conda/assemblycomparator2-master/
-
-    """
 
 
-# This one installs installs the package and does a dry run
-rule r12_install:
-    input: 
-        "out/1_latest_conda/assemblycomparator2-master/asscom2"
+
+
+
+
+# Latest "development" version on github (branch master)
+# Reuses the default conda prefix and databases which are probably already set up on the developing machine.
+rule r1_latest_reuse:
     output:
-        touch("out/1_latest_conda/12_done.flag"),
+        touch("1_done.flag"),
+        dir = directory("out/1_latest")
+    threads: 16
     shell: """
     
-        # Save 
-        fnas=$(realpath fnas/E._faecium_4)
-        set_conda_prefix="$(pwd -P)/static_conda_prefix"
+    
+        # Download latest.
+        mkdir -p {output.dir}
+        rm -r {output.dir}/* || echo "{output.dir} is already empty"
+        
+        wget --continue -O {output.dir}/master.zip https://github.com/cmkobel/assemblycomparator2/archive/refs/heads/master.zip
+        unzip -d {output.dir} {output.dir}/master.zip 
+        
+        fnas=$(realpath fnas/E._faecium_4)         
         
         # Enter the dir where we just downloaded latest 
-        cd out/1_latest_conda/assemblycomparator2-master/
+        cd {output.dir}/assemblycomparator2-master/
+        
+        
+        ls -lh
+        
         
         # Install environment.
-        conda env create -y -f environment.yaml -n asscom2_latest_test
-        source activate asscom2_latest_test
-
-        export ASSCOM2_BASE=$(pwd -P)
-
-        # Run latest dry run
-        #export ASSCOM2_BASE="$(realpath ~/asscom2)"
-        export ASSCOM2_PROFILE="${{ASSCOM2_BASE}}/profile/conda/default"
-        ${{ASSCOM2_BASE}}/asscom2 \
-            --config \
-                input_genomes="${{fnas}}/*.fna" \
-        --conda-prefix $set_conda_prefix \
-        --until fast \
-        --dry-run
+        mamba create -y -f environment.yaml -n ac2_ci_conda_latest_reuse
+        source activate ac2_ci_conda_latest
 
 
-    """
+        export ASSCOM2_PROFILE="$(realpath profile/conda/default)"
 
-# This rule does a full run on a static database.
-# If you purge static_conda_prefix, you can force reinstalling the conda environments.
-# Uses the same database as is already on the system.
-rule r13_run_staticdb:
-    input: 
-        "out/1_latest_conda/assemblycomparator2-master/asscom2", 
-    output: 
-        touch("static_conda_prefix/yamls_done.flag"),
-        touch("out/1_latest_conda/13_done.flag"),
-        #"out/1_latest_conda/tests/E._faecium/results_ac2/report_E._faecium.html",
-        touch("1_done.flag")
-    threads: 32
-    shell: """
-    
-        # Save 
-        fnas=$(realpath fnas/E._faecium_4)
-        set_conda_prefix="$(pwd -P)/static_conda_prefix"
         
-        # Enter the dir where we just downloaded latest 
-        cd out/1_latest_conda/assemblycomparator2-master/
-        
-        source activate asscom2_latest_test
-        
-        export ASSCOM2_BASE=$(pwd -P)
-        
-        # Run latest
-        #export ASSCOM2_BASE="$(realpath ~/asscom2)"
-        export ASSCOM2_PROFILE="${{ASSCOM2_BASE}}/profile/conda/default"
-        ${{ASSCOM2_BASE}}/asscom2 \
+        ./asscom2 --version
+        ./asscom2 \
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
-        --conda-prefix $set_conda_prefix 
+        --until fast 
         
     """
 
 
-# Uses its own closed database.
-rule r141_database:
-    input:
-        "out/1_latest_conda/assemblycomparator2-master/asscom2", 
-        "static_conda_prefix/yamls_done.flag"
+# Same as r1 but including database downloads and fresh conda
+rule r2_latest:
     output:
-        touch("out/1_latest_conda/141_done.flag")
-    threads: 6 # 6 Databases to download in parallel.
-    shell: """
-
-        # Save 
-        fnas=$(realpath fnas/E._faecium_4)
-        set_conda_prefix="$(pwd -P)/static_conda_prefix"
-        export ASSCOM2_DATABASES="$(realpath dynamic_db)"
-        
-        mkdir -p $ASSCOM2_DATABASES
-        
-        # Enter the dir where we just downloaded latest 
-        cd out/1_latest_conda/assemblycomparator2-master/
-        
-        source activate asscom2_latest_test
-        
-        export ASSCOM2_BASE=$(pwd -P)
-        
-        # Run latest
-        #export ASSCOM2_BASE="$(realpath ~/asscom2)"
-        export ASSCOM2_PROFILE="${{ASSCOM2_BASE}}/profile/conda/default"
-        ${{ASSCOM2_BASE}}/asscom2 \
-            --cores {threads} \
-            --config \
-                input_genomes="${{fnas}}/*.fna" \
-        --conda-prefix $set_conda_prefix \
-            --until downloads 
-
-
-        
-    """
-
-# Then test the newly downloaded database.
-rule r142_run:
-    input: 
-        "out/1_latest_conda/assemblycomparator2-master/asscom2", 
-        "static_conda_prefix/yamls_done.flag"
-    output: 
-        touch("out/1_latest_conda/15_done.flag"),
-        "out/1_latest_conda/tests/E._faecium/results_ac2/report_E._faecium.html",
-        touch("1_done.flag")
-        
+        touch("2_done.flag"),
+        dir = directory("out/2_latest")
     threads: 16
     shell: """
-
-        # Save 
-        fnas=$(realpath fnas/E._faecium_4)
-        set_conda_prefix="$(pwd -P)/static_conda_prefix"
-        export ASSCOM2_DATABASES="$(realpath dynamic_db)"
+    
+    
+        # Download latest.
+        mkdir -p {output.dir}
+        rm -r {output.dir}/* || echo "{output.dir} is already empty"
         
-        mkdir -p $ASSCOM2_DATABASES
+        wget --continue -O {output.dir}/master.zip https://github.com/cmkobel/assemblycomparator2/archive/refs/heads/master.zip
+        unzip -d {output.dir} {output.dir}/master.zip 
+        
+        fnas=$(realpath fnas/E._faecium_4)         
+        mkdir -p {output.dir}/conda_prefix
+        set_conda_prefix=$(realpath {output.dir}/conda_prefix)
+        mkdir -p {output.dir}/db
+        export ASSCOM2_DATABASES="$(realpath {output.dir}/db)"
         
         # Enter the dir where we just downloaded latest 
-        cd out/1_latest_conda/assemblycomparator2-master/
+        cd {output.dir}/assemblycomparator2-master/
         
-        source activate asscom2_latest_test
         
-        export ASSCOM2_BASE=$(pwd -P)
+        ls -lh
         
-        # Run latest
-        #export ASSCOM2_BASE="$(realpath ~/asscom2)"
-        export ASSCOM2_PROFILE="${{ASSCOM2_BASE}}/profile/conda/default"
-        ${{ASSCOM2_BASE}}/asscom2 \
+        
+        # Install environment.
+        mamba create -y -f environment.yaml -n ac2_ci_conda_latest
+        source activate ac2_ci_conda_latest
+
+
+        export ASSCOM2_PROFILE="$(realpath profile/conda/default)"
+
+        
+        ./asscom2 --version
+        ./asscom2 \
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
         --conda-prefix $set_conda_prefix \
-            --until bakta busco checkm2 dbcan eggnog gtdbtk \
-            --forcerun bakta busco checkm2 dbcan eggnog gtdbtk
-
-
+        --until fast 
         
-
-    """
-
-
-
-
-# 2 latest, apptainer
-
-rule r21_apptainer_dry:
-    output:
-        touch("out/2_apptainer/21_done.flag"),
-        touch("2_done.flag")
-    shell: """
     
-        apptainer --version
-        mamba --version
-
-        mamba create \
-            -y \
-            -c conda-forge \
-            -c bioconda \
-            -n assemblycomparator2-ac2-test-battery assemblycomparator2
-
-        source activate assemblycomparator2-ac2-test-battery
-
-        asscom2 --version
-
-    """
-
-
-rule r22_run:
-    input: 
-        "out/2_apptainer/21_done.flag"
-    output:
-        touch("out/2_apptainer/22_done.flag")
-    threads: 16
-    shell: """
-
-        # Activate environment
-        source activate assemblycomparator2-ac2-test-battery
-
-        echo "Testing ac version:"
-        asscom2 --version
-
-        # Gather test fnas.
-        cd out/2_apptainer
-        cp ../../fnas/*.fna .
-
-        # Run asscom2.
-        #asscom2 --until fast --cores {threads}
-        asscom2 --cores {threads}
-        
-        
     """
 
 
 rule r3_conda_stable:
     output:
-        touch("out/3_conda_stable/3_done.flag"),
-        touch("3_done.flag")
+        touch("3_done.flag"),
+        dir = "out/3_conda_stable"        
     threads: 16
     shell: """
         
-        mamba create -y -c conda-forge -c bioconda -n assemblycomparator2_ci_conda_stable assemblycomparator2
+        mamba create -y -c conda-forge -c bioconda -n ac2_ci_conda_stable assemblycomparator2
 
-        
-        source activate assemblycomparator2_ci_conda_stable
+        source activate ac2_ci_conda_stable
         
         asscom2 --version
-        
-        
+            
         # Set up database
-        test -d dynamic_db_stable && rm -r dynamic_db_stable
-        mkdir -p dynamic_db_stable
-        export ASSCOM2_DATABASES="$(realpath dynamic_db_stable)"
+        #test -d {output.dir}/dynamic_db_stable && rm -r {output.dir}/dynamic_db_stable
+        #mkdir -p {output.dir}/dynamic_db_stable
+        #export ASSCOM2_DATABASES="$(realpath {output.dir}/dynamic_db_stable)"
         
-        # Let's not worry about the profile for now.
+        export ASSCOM2_PROFILE="$(dirname $(realpath $(which asscom2)))/profile/conda/default"
         asscom2 \
+            --cores {threads} \
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
-                output_directory="out/3_conda_stable"
-        
+                output_directory="{output.dir}"
+    
+    """
+    
+    
+    
+rule r4_apptainer:
+    output:
+        touch("4_done.flag"),
+        dir = directory("out/4_apptainer")
+    shell: """
+    
+        apptainer --version
     
         
+        mamba create -y -c conda-forge -c bioconda -n ac2_ci_apptainer assemblycomparator2
+        source activate ac2_ci_apptainer
+        
+        # Let's use the static db for now (debugging)
+        mkdir -p {output.dir}/db
+        export ASSCOM2_DATABASES=$(realpath {output.dir}/db)
+
+        export ASSCOM2_PROFILE="$(dirname $(realpath $(which asscom2)))/profile/apptainer/default"
+        asscom2 \
+            --cores {threads} \
+            --config \
+                input_genomes="fnas/E._faecium_4/*.fna" \
+                output_directory="{output.dir}"
+    
         
     """
 
