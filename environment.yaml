@@ -5,3 +5,7 @@ channels:
 dependencies:
   - mamba # probably is on the system already.
   - snakemake=7.32.4 # Last version before they completely changed the structure.
+  
+  
+# conda env create -f environment.yaml
+
