@@ -1,4 +1,4 @@
-name: ac2-test-battery
+name: comparem2-ci
 channels:
   - conda-forge
   - bioconda
@@ -7,5 +7,5 @@ dependencies:
   - snakemake=7.32.4 # Last version before they completely changed the structure.
   
   
-# conda env create -f environment.yaml
+# mamba env create -f environment.yaml
 

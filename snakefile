@@ -1,5 +1,5 @@
-# snakemake v7
-# snakemake --cores 32
+# mamba activate comparem2-ci
+# snakemake --cores 16 --until r1_latest_reuse
 
 # Two types of errors:
 # 1) Those that I impose upon erroneous addition of new functionality and tweaks
@@ -23,11 +23,9 @@ rule all:
 rule r1_latest_reuse:
     output:
         touch("1_done.flag"),
-        log = "out/1_latest_reuse/log.txt",
         dir = directory("out/1_latest_reuse")
     threads: 16
     shell: """
-    
     
         # Download latest.
         mkdir -p {output.dir}
@@ -58,7 +56,7 @@ rule r1_latest_reuse:
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
-        | tee -a {output.log}
+            --until fast 
         
     """
 
@@ -67,7 +65,6 @@ rule r1_latest_reuse:
 rule r2_latest:
     output:
         touch("2_done.flag"),
-        log = "out/2_latest/log.txt",
         dir = directory("out/2_latest")
     threads: 16
     shell: """
@@ -104,8 +101,7 @@ rule r2_latest:
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
-        --conda-prefix $set_conda_prefix \
-        | tee -a {output.log}
+        --conda-prefix $set_conda_prefix 
         
     
     """
@@ -114,7 +110,6 @@ rule r2_latest:
 rule r3_conda_stable:
     output:
         touch("3_done.flag"),
-        log = "out/3_conda_stable/log.txt",
         dir = directory("out/3_conda_stable")
     threads: 16
     shell: """
@@ -142,8 +137,7 @@ rule r3_conda_stable:
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" \
-            --conda-prefix $set_conda_prefix \
-        | tee -a {output.log}
+            --conda-prefix $set_conda_prefix 
     
     """
     
@@ -152,7 +146,6 @@ rule r3_conda_stable:
 rule r4_apptainer:
     output:
         touch("4_done.flag"),
-        log = "out/4_apptainer/log.txt",
         dir = directory("out/4_apptainer")
     threads: 16
     shell: """
@@ -176,8 +169,7 @@ rule r4_apptainer:
             --cores {threads} \
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
-                output_directory="{output.dir}" \
-        | tee -a {output.log}
+                output_directory="{output.dir}" 
     
         
     """
