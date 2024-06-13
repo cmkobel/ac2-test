@@ -33,13 +33,13 @@ rule r1_latest_reuse:
         mkdir -p {output.dir}
         rm -r {output.dir}/* || echo "{output.dir} is already empty"
         
-        wget --continue -O {output.dir}/master.zip https://github.com/cmkobel/assemblycomparator2/archive/refs/heads/master.zip
+        wget --continue -O {output.dir}/master.zip https://github.com/cmkobel/comparem2/archive/refs/heads/master.zip
         unzip -d {output.dir} {output.dir}/master.zip 
         
         fnas=$(realpath fnas/E._faecium_4)         
         
         # Enter the dir where we just downloaded latest 
-        cd {output.dir}/assemblycomparator2-master/
+        cd {output.dir}/comparem2-master/
         
         
         ls -lh
@@ -50,15 +50,15 @@ rule r1_latest_reuse:
         source activate ac2_ci_conda_latest_reuse
 
 
-        export ASSCOM2_PROFILE="$(realpath profile/conda/default)"
+        export COMPAREM2_PROFILE="$(realpath profile/conda/default)"
 
         
-        ./asscom2 --version
-        ./asscom2 \
+        ./comparem2 --version
+        ./comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
-        | tee -a log.txt
+        | tee -a {output.log}
         
     """
 
@@ -67,6 +67,7 @@ rule r1_latest_reuse:
 rule r2_latest:
     output:
         touch("2_done.flag"),
+        log = "out/2_latest/log.txt",
         dir = directory("out/2_latest")
     threads: 16
     shell: """
@@ -103,7 +104,8 @@ rule r2_latest:
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
-        --conda-prefix $set_conda_prefix
+        --conda-prefix $set_conda_prefix \
+        | tee -a {output.log}
         
     
     """
@@ -112,6 +114,7 @@ rule r2_latest:
 rule r3_conda_stable:
     output:
         touch("3_done.flag"),
+        log = "out/3_conda_stable/log.txt",
         dir = directory("out/3_conda_stable")
     threads: 16
     shell: """
@@ -139,7 +142,8 @@ rule r3_conda_stable:
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" \
-            --conda-prefix $set_conda_prefix
+            --conda-prefix $set_conda_prefix \
+        | tee -a {output.log}
     
     """
     
@@ -148,6 +152,7 @@ rule r3_conda_stable:
 rule r4_apptainer:
     output:
         touch("4_done.flag"),
+        log = "out/4_apptainer/log.txt",
         dir = directory("out/4_apptainer")
     threads: 16
     shell: """
@@ -171,7 +176,8 @@ rule r4_apptainer:
             --cores {threads} \
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
-                output_directory="{output.dir}"
+                output_directory="{output.dir}" \
+        | tee -a {output.log}
     
         
     """
