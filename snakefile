@@ -1,5 +1,9 @@
 # mamba activate comparem2-ci
-# snakemake --cores 16 --until r1_latest_reuse
+# snakemake --profile profile/default --until all
+# snakemake --profile profile/default --until r1_latest_reuse
+# snakemake --profile profile/default --until r2_latest
+# snakemake --profile profile/default --until r3_conda_stable
+# snakemake --profile profile/default --until r4_apptainer
 
 # Two types of errors:
 # 1) Those that I impose upon erroneous addition of new functionality and tweaks
@@ -37,7 +41,7 @@ rule r1_latest_reuse:
         fnas=$(realpath fnas/E._faecium_4)         
         
         # Enter the dir where we just downloaded latest 
-        cd {output.dir}/comparem2-master/
+        cd {output.dir}/CompareM2-master/
         
         
         ls -lh
@@ -55,8 +59,7 @@ rule r1_latest_reuse:
         ./comparem2 \
             --cores {threads} \
             --config \
-                input_genomes="${{fnas}}/*.fna" \
-            --until fast 
+                input_genomes="${{fnas}}/*.fna" 
         
     """
 
@@ -86,7 +89,7 @@ rule r2_latest:
         export ASSCOM2_DATABASES="$(realpath {output.dir}/db)"
         
         # Enter the dir where we just downloaded latest 
-        cd {output.dir}/assemblycomparator2-master
+        cd {output.dir}/CompareM2-master/
         
         ls -lh
         
