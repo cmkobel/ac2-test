@@ -127,9 +127,9 @@ rule conda_stable:
     threads: 16
     shell: """
         
-        mamba create -y -c conda-forge -c bioconda -n ac2_ci_conda_stable assemblycomparator2
+        mamba create -y -c conda-forge -c bioconda -n cm2_ci_conda_stable comparem2
 
-        source activate ac2_ci_conda_stable
+        source activate cm2_ci_conda_stable
         
         comparem2 --version
             
@@ -167,8 +167,8 @@ rule apptainer:
         apptainer --version
         
         # Create conda environment.
-        mamba create -y -c conda-forge -c bioconda -n ac2_ci_apptainer assemblycomparator2
-        source activate ac2_ci_apptainer
+        mamba create -y -c conda-forge -c bioconda -n cm2_ci_apptainer comparem2
+        source activate cm2_ci_apptainer
         
         # Set up db
         mkdir -p {output.dir}/db
