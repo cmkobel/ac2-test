@@ -9,7 +9,15 @@
 # 1) Those that I impose upon erroneous addition of new functionality and tweaks
 # 2) Those that come from upstream changes in updated conda environments. These are only prone to happen in the non-apptainer runs, hence the apptainer mostly tests the database download.
 
-report_dir = "~/PhD/19_CompareM2_MS/CI_reports"
+import socket
+
+
+hostname = socket.gethostname()
+report_dir = "~/PhD/19_CompareM2_MS/CI_reports/" + hostname
+
+
+
+print("report_dir:", report_dir)
 
 
 rule all:
@@ -26,7 +34,7 @@ rule all:
 # Like latest_reuse but fast
 rule fast:
     output:
-        touch("0_done.flag"),
+        flag = "0_done.flag",
         dir = directory("out/0_fast")
     threads: 16
     shell: """
@@ -56,6 +64,8 @@ rule fast:
                 output_directory="{output.dir}" \
                 title="fast" \
             --until fast
+            
+        echo $(date) > {output.flag}
         
     """
 
@@ -64,7 +74,7 @@ rule fast:
 # Reuses the default conda prefix and databases which are probably already set up on the developing machine.
 rule latest_reuse:
     output:
-        touch("1_done.flag"),
+        flag = "1_done.flag",
         dir = directory("out/1_latest_reuse")
     threads: 16
     shell: """
@@ -93,6 +103,8 @@ rule latest_reuse:
                 input_genomes="${{fnas}}/*.fna" \
                 output_directory="{output.dir}" \
                 title="latest_reuse"
+                
+        echo $(date) > {output.flag}
         
     """
 
@@ -100,7 +112,7 @@ rule latest_reuse:
 # Same as "latest_reuse" but including database downloads and fresh conda
 rule latest:
     output:
-        touch("2_done.flag"),
+        flag = "2_done.flag",
         dir = directory("out/2_latest")
     threads: 16
     shell: """
@@ -145,15 +157,14 @@ rule latest:
                 title="latest_reuse" \
             --conda-prefix $set_conda_prefix
         
-    
-     
+        echo $(date) > {output.flag}
     
     """
 
 # 3)
 rule conda_stable:
     output:
-        touch("3_done.flag"),
+        "3_done.flag",
         dir = directory("out/3_conda_stable")
     threads: 16
     shell: """
@@ -196,6 +207,8 @@ rule conda_stable:
                 title="conda_stable" \
             --conda-prefix $set_conda_prefix 
             
+        echo $(date) > {output.flag}
+            
         
     
     """
@@ -204,7 +217,7 @@ rule conda_stable:
 # 4)
 rule apptainer:
     output:
-        touch("4_done.flag"),
+        flag = "4_done.flag",
         dir = directory("out/4_apptainer")
     threads: 16
     shell: """
@@ -238,15 +251,16 @@ rule apptainer:
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" \
                 title="apptainer"
-            
+        
+        echo $(date) > {output.flag}
         
     """
 
 
 
-# Until I implement some smart email service this is the solution.
+# Communicate the completion somehow.
 
-final = f"mkdir -p {report_dir}; rm {report_dir}/*.flag; cp *_done.flag {report_dir}"
+final = f"""mkdir -p {report_dir}; test -f "{report_dir}/*.flag" && rm -rf "{report_dir}/*.flag"; cp -rf *_done.flag {report_dir}; ls {report_dir}"""
 
 onsuccess:
     shell(final)
