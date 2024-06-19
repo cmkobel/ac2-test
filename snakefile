@@ -245,14 +245,11 @@ rule apptainer:
 
 
 # Until I implement some smart email service this is the solution.
+
+final = f"mkdir -p {report_dir}; rm {report_dir}/*.flag; cp *_done.flag {report_dir}"
+
 onsuccess:
-    shell: f"""
-        rm {report_dir}/ERROR.flag
-        echo $(date) > {report_dir}/SUCCESS.flag
-    """
+    shell(final)
     
 onerror:
-    shell: f"""
-        rm {report_dir}/SUCCESS.flag
-        echo $(date) > {report_dir}/ERROR.flag
-    """
+    shell(final)
