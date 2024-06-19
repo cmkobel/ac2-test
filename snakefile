@@ -145,12 +145,25 @@ rule conda_stable:
         export COMPAREM2_DATABASES="$(realpath {output.dir}/db)"
         
         export COMPAREM2_PROFILE="$(dirname $(realpath $(which comparem2)))/profile/conda/default"
+        
+        # First downloads
+        comparem2 \
+            --cores {threads} \
+            --config \
+                input_genomes="fnas/E._faecium_4/*.fna" \
+                output_directory="{output.dir}" \
+            --conda-prefix $set_conda_prefix \
+            --until downloads
+            
+        # Then everything
         comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" \
             --conda-prefix $set_conda_prefix 
+            
+        
     
     """
     
@@ -177,13 +190,20 @@ rule apptainer:
         export COMPAREM2_PROFILE="$(dirname $(realpath $(which comparem2)))/profile/apptainer/default"
         which comparem2 
         comparem2 --version
-        sleep 10
+        
+        comparem2 \
+            --cores {threads} \
+            --config \
+                input_genomes="fnas/E._faecium_4/*.fna" \
+                output_directory="{output.dir}" \
+            --until downloads
+                
         comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" 
-    
+            
         
     """
 
