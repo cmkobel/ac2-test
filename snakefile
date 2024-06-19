@@ -9,7 +9,7 @@
 # 1) Those that I impose upon erroneous addition of new functionality and tweaks
 # 2) Those that come from upstream changes in updated conda environments. These are only prone to happen in the non-apptainer runs, hence the apptainer mostly tests the database download.
 
-report_dir = "~/PhD/19_asscom2_MS/CI_reports"
+report_dir = "~/PhD/19_CompareM2_MS/CI_reports"
 
 
 rule all:
@@ -78,7 +78,7 @@ rule latest:
         rm -r {output.dir}/* || echo "{output.dir} is already empty"
         
         # Download latest
-        wget --continue -O {output.dir}/master.zip https://github.com/cmkobel/assemblycomparator2/archive/refs/heads/master.zip
+        wget --continue -O {output.dir}/master.zip https://github.com/cmkobel/comparem2/archive/refs/heads/master.zip
         unzip -d {output.dir} {output.dir}/master.zip 
         
         # Set up variables.
@@ -213,11 +213,11 @@ rule apptainer:
 onsuccess:
     shell: f"""
         rm {report_dir}/ERROR.flag
-        touch {report_dir}/SUCCESS.flag
+        echo $(date) > {report_dir}/SUCCESS.flag
     """
     
 onerror:
     shell: f"""
-        touch {report_dir}/ERROR.flag
         rm {report_dir}/SUCCESS.flag
+        echo $(date) > {report_dir}/ERROR.flag
     """
