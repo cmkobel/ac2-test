@@ -1,9 +1,9 @@
 # mamba activate comparem2-ci
 # snakemake --profile profile/default --until all
-# snakemake --profile profile/default --until r1_latest_reuse
-# snakemake --profile profile/default --until r2_latest
-# snakemake --profile profile/default --until r3_conda_stable
-# snakemake --profile profile/default --until r4_apptainer
+# snakemake --profile profile/default --until latest_reuse
+# snakemake --profile profile/default --until latest
+# snakemake --profile profile/default --until conda_stable
+# snakemake --profile profile/default --until apptainer
 
 # Two types of errors:
 # 1) Those that I impose upon erroneous addition of new functionality and tweaks
@@ -14,17 +14,17 @@ report_dir = "~/PhD/19_asscom2_MS/CI_reports"
 
 rule all:
     input: 
-        "1_done.flag", # r1_latest_reuse
-        "2_done.flag", # r2_latest
-        "3_done.flag", # r3_conda_stable
-        "4_done.flag", # r4_apptainer
+        "1_done.flag", # latest_reuse
+        "2_done.flag", # latest
+        "3_done.flag", # conda_stable
+        "4_done.flag", # apptainer
         
 
 
 
 # Latest "development" version on github (branch master)
 # Reuses the default conda prefix and databases which are probably already set up on the developing machine.
-rule r1_latest_reuse:
+rule latest_reuse:
     output:
         touch("1_done.flag"),
         dir = directory("out/1_latest_reuse")
@@ -65,7 +65,7 @@ rule r1_latest_reuse:
 
 
 # Same as r1 but including database downloads and fresh conda
-rule r2_latest:
+rule latest:
     output:
         touch("2_done.flag"),
         dir = directory("out/2_latest")
@@ -110,7 +110,7 @@ rule r2_latest:
     """
 
 
-rule r3_conda_stable:
+rule conda_stable:
     output:
         touch("3_done.flag"),
         dir = directory("out/3_conda_stable")
@@ -146,7 +146,7 @@ rule r3_conda_stable:
     
     
     
-rule r4_apptainer:
+rule apptainer:
     output:
         touch("4_done.flag"),
         dir = directory("out/4_apptainer")
