@@ -31,35 +31,30 @@ rule latest_reuse:
     threads: 16
     shell: """
     
-        # Download latest.
+        # Prepare output directory.
         mkdir -p {output.dir}
         rm -r {output.dir}/* || echo "{output.dir} is already empty"
         
+        # Download latest.
         wget --continue -O {output.dir}/master.zip https://github.com/cmkobel/comparem2/archive/refs/heads/master.zip
         unzip -d {output.dir} {output.dir}/master.zip 
         
+        # Set up variables.
         fnas=$(realpath fnas/E._faecium_4)         
-        
-        # Enter the dir where we just downloaded latest 
-        cd {output.dir}/CompareM2-master/
-        
-        
-        ls -lh
-        
-        
+                
         # Install environment.
-        mamba env create -y -f environment.yaml -n ac2_ci_conda_latest_reuse
+        mamba env create -y -f {output.dir}/CompareM2-master/environment.yaml -n ac2_ci_conda_latest_reuse
         source activate ac2_ci_conda_latest_reuse
 
-
-        export COMPAREM2_PROFILE="$(realpath profile/conda/default)"
-
+        export COMPAREM2_PROFILE="$(realpath {output.dir}/CompareM2-master/profile/conda/default)"
         
-        ./comparem2 --version
-        ./comparem2 \
+        {output.dir}/CompareM2-master/comparem2 --version
+        {output.dir}/CompareM2-master/comparem2 \
             --cores {threads} \
             --config \
-                input_genomes="${{fnas}}/*.fna" 
+                input_genomes="${{fnas}}/*.fna" \
+                output_directory="{output.dir}" \
+                title="latest_reuse"
         
     """
 
@@ -72,52 +67,48 @@ rule latest:
     threads: 16
     shell: """
     
-    
-        # Prepare output directory
+        # Prepare output directory.
         mkdir -p {output.dir}
         rm -r {output.dir}/* || echo "{output.dir} is already empty"
         
-        # Download latest
+        # Download latest.
         wget --continue -O {output.dir}/master.zip https://github.com/cmkobel/comparem2/archive/refs/heads/master.zip
         unzip -d {output.dir} {output.dir}/master.zip 
         
+        
         # Set up variables.
-        fnas=$(realpath fnas/E._faecium_4)         
+        fnas=$(realpath fnas/E._faecium_4)
         mkdir -p {output.dir}/conda_prefix
         set_conda_prefix=$(realpath {output.dir}/conda_prefix)
         mkdir -p {output.dir}/db
-        export COMPAREM2_DATABASES="$(realpath {output.dir}/db)"
-        
-        # Enter the dir where we just downloaded latest 
-        cd {output.dir}/CompareM2-master/
-        
-        ls -lh
-        
+        export COMPAREM2_DATABASES="$(realpath {output.dir}/db)"    
+                
         # Install environment.
-        mamba env create -y -f environment.yaml -n ac2_ci_conda_latest
-        source activate ac2_ci_conda_latest
+        mamba env create -y -f {output.dir}/CompareM2-master/environment.yaml -n ac2_ci_conda_latest_reuse
+        source activate ac2_ci_conda_latest_reuse
 
-        export COMPAREM2_PROFILE="$(realpath profile/conda/default)"
-
-        ./comparem2 --version
+        export COMPAREM2_PROFILE="$(realpath {output.dir}/CompareM2-master/profile/conda/default)"
         
-        # First call downloads
-        ./comparem2 \
+        {output.dir}/CompareM2-master/comparem2 --version
+        {output.dir}/CompareM2-master/comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
-                title="latest" \
-        --conda-prefix $set_conda_prefix \
-        --until downloads
+                output_directory="{output.dir}" \
+                title="latest_reuse" \
+            --conda-prefix $set_conda_prefix \
+            --until downloads
+        
+        {output.dir}/CompareM2-master/comparem2 \
+            --cores {threads} \
+            --config \
+                input_genomes="${{fnas}}/*.fna" \
+                output_directory="{output.dir}" \
+                title="latest_reuse" \
+            --conda-prefix $set_conda_prefix
+        
     
-        # Then the complete pipeline
-        ./comparem2 --version
-        ./comparem2 \
-            --cores {threads} \
-            --config \
-                input_genomes="${{fnas}}/*.fna" \
-                title="latest" \
-        --conda-prefix $set_conda_prefix 
+     
     
     """
 
