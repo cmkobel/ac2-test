@@ -86,7 +86,7 @@ rule latest:
         mkdir -p {output.dir}/conda_prefix
         set_conda_prefix=$(realpath {output.dir}/conda_prefix)
         mkdir -p {output.dir}/db
-        export ASSCOM2_DATABASES="$(realpath {output.dir}/db)"
+        export COMPAREM2_DATABASES="$(realpath {output.dir}/db)"
         
         # Enter the dir where we just downloaded latest 
         cd {output.dir}/CompareM2-master/
@@ -97,15 +97,25 @@ rule latest:
         mamba env create -y -f environment.yaml -n ac2_ci_conda_latest
         source activate ac2_ci_conda_latest
 
-        export ASSCOM2_PROFILE="$(realpath profile/conda/default)"
+        export COMPAREM2_PROFILE="$(realpath profile/conda/default)"
 
-        ./asscom2 --version
-        ./asscom2 \
+        ./comparem2 --version
+        
+        # First call downloads
+        ./comparem2 \
+            --cores {threads} \
+            --config \
+                input_genomes="${{fnas}}/*.fna" \
+        --conda-prefix $set_conda_prefix \
+        --until downloads
+    
+        # Then the complete pipeline
+        ./comparem2 --version
+        ./comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
         --conda-prefix $set_conda_prefix 
-        
     
     """
 
