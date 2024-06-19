@@ -106,6 +106,7 @@ rule latest:
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
+                title="latest" \
         --conda-prefix $set_conda_prefix \
         --until downloads
     
@@ -115,6 +116,7 @@ rule latest:
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
+                title="latest" \
         --conda-prefix $set_conda_prefix 
     
     """
@@ -152,6 +154,7 @@ rule conda_stable:
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" \
+                title="conda_stable" \
             --conda-prefix $set_conda_prefix \
             --until downloads
             
@@ -161,6 +164,7 @@ rule conda_stable:
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" \
+                title="conda_stable" \
             --conda-prefix $set_conda_prefix 
             
         
@@ -196,13 +200,15 @@ rule apptainer:
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" \
+                title="apptainer" \
             --until downloads
                 
         comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
-                output_directory="{output.dir}" 
+                output_directory="{output.dir}" \
+                title="apptainer"
             
         
     """
