@@ -1,4 +1,3 @@
 keep-incomplete: true
 rerun-incomplete: true
-printshellcmds: true
 cores: 48
