@@ -14,12 +14,50 @@ report_dir = "~/PhD/19_CompareM2_MS/CI_reports"
 
 rule all:
     input: 
+        "0_done.flag", # fast
         "1_done.flag", # latest_reuse
         "2_done.flag", # latest
         "3_done.flag", # conda_stable
         "4_done.flag", # apptainer
         
 
+
+# 0)
+# Like latest_reuse but fast
+rule fast:
+    output:
+        touch("0_done.flag"),
+        dir = directory("out/0_fast")
+    threads: 16
+    shell: """
+    
+        # Prepare output directory.
+        mkdir -p {output.dir}
+        rm -r {output.dir}/* || echo "{output.dir} is already empty"
+        
+        # Download latest.
+        wget --continue -O {output.dir}/master.zip https://github.com/cmkobel/comparem2/archive/refs/heads/master.zip
+        unzip -d {output.dir} {output.dir}/master.zip 
+        
+        # Set up variables.
+        fnas=$(realpath fnas/E._faecium_4)         
+                
+        # Install environment.
+        mamba env create -y -f {output.dir}/CompareM2-master/environment.yaml -n ac2_ci_fast
+        source activate ac2_ci_fast
+
+        export COMPAREM2_PROFILE="$(realpath {output.dir}/CompareM2-master/profile/conda/default)"
+        
+        {output.dir}/CompareM2-master/comparem2 --version
+        {output.dir}/CompareM2-master/comparem2 \
+            --cores {threads} \
+            --config \
+                input_genomes="${{fnas}}/*.fna" \
+                output_directory="{output.dir}" \
+                title="fast" \
+            --until fast
+        
+    """
 
 # 1)
 # Latest "development" version on github (branch master)
