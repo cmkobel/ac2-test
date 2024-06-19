@@ -21,7 +21,7 @@ rule all:
         
 
 
-
+# 1)
 # Latest "development" version on github (branch master)
 # Reuses the default conda prefix and databases which are probably already set up on the developing machine.
 rule latest_reuse:
@@ -58,8 +58,8 @@ rule latest_reuse:
         
     """
 
-
-# Same as r1 but including database downloads and fresh conda
+# 2)
+# Same as "latest_reuse" but including database downloads and fresh conda
 rule latest:
     output:
         touch("2_done.flag"),
@@ -112,7 +112,7 @@ rule latest:
     
     """
 
-
+# 3)
 rule conda_stable:
     output:
         touch("3_done.flag"),
@@ -163,7 +163,7 @@ rule conda_stable:
     """
     
     
-    
+# 4)
 rule apptainer:
     output:
         touch("4_done.flag"),
