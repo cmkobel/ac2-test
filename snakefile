@@ -131,21 +131,21 @@ rule conda_stable:
 
         source activate ac2_ci_conda_stable
         
-        asscom2 --version
+        comparem2 --version
             
         # Set up database
         #test -d {output.dir}/dynamic_db_stable && rm -r {output.dir}/dynamic_db_stable
         #mkdir -p {output.dir}/dynamic_db_stable
-        #export ASSCOM2_DATABASES="$(realpath {output.dir}/dynamic_db_stable)"
+        #export COMPAREM2_DATABASES="$(realpath {output.dir}/dynamic_db_stable)"
         
         # Set up variables. 
         mkdir -p {output.dir}/conda_prefix
         set_conda_prefix=$(realpath {output.dir}/conda_prefix)
         mkdir -p {output.dir}/db
-        export ASSCOM2_DATABASES="$(realpath {output.dir}/db)"
+        export COMPAREM2_DATABASES="$(realpath {output.dir}/db)"
         
-        export ASSCOM2_PROFILE="$(dirname $(realpath $(which asscom2)))/profile/conda/default"
-        asscom2 \
+        export COMPAREM2_PROFILE="$(dirname $(realpath $(which comparem2)))/profile/conda/default"
+        comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
@@ -172,13 +172,13 @@ rule apptainer:
         
         # Set up db
         mkdir -p {output.dir}/db
-        export ASSCOM2_DATABASES=$(realpath {output.dir}/db)
+        export COMPAREM2_DATABASES=$(realpath {output.dir}/db)
 
-        export ASSCOM2_PROFILE="$(dirname $(realpath $(which asscom2)))/profile/apptainer/default"
-        which asscom2 
-        asscom2 --version
+        export COMPAREM2_PROFILE="$(dirname $(realpath $(which comparem2)))/profile/apptainer/default"
+        which comparem2 
+        comparem2 --version
         sleep 10
-        asscom2 \
+        comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
