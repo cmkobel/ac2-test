@@ -63,8 +63,7 @@ rule fast:
                 input_genomes="${{fnas}}/*.fna" \
                 output_directory="{output.dir}" \
                 title="fast" \
-            --until fast \
-            --all-temp
+            --until fast 
             
         echo $(date) > {output.flag}
         
@@ -103,8 +102,7 @@ rule latest_reuse:
             --config \
                 input_genomes="${{fnas}}/*.fna" \
                 output_directory="{output.dir}" \
-                title="latest_reuse" \
-            --all-temp
+                title="latest_reuse" 
                 
         echo $(date) > {output.flag}
         
@@ -148,8 +146,7 @@ rule latest:
                 input_genomes="${{fnas}}/*.fna" \
                 output_directory="{output.dir}" \
                 title="latest_reuse" \
-            --conda-prefix $set_conda_prefix \
-            --all-temp
+            --conda-prefix $set_conda_prefix 
         
         echo $(date) > {output.flag}
     
@@ -189,8 +186,7 @@ rule conda_stable:
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" \
                 title="conda_stable" \
-            --conda-prefix $set_conda_prefix \
-            --all-temp
+            --conda-prefix $set_conda_prefix 
             
             
         echo $(date) > {output.flag}
