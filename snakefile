@@ -63,7 +63,8 @@ rule fast:
                 input_genomes="${{fnas}}/*.fna" \
                 output_directory="{output.dir}" \
                 title="fast" \
-            --until fast
+            --until fast \
+            --all-temp
             
         echo $(date) > {output.flag}
         
@@ -102,7 +103,8 @@ rule latest_reuse:
             --config \
                 input_genomes="${{fnas}}/*.fna" \
                 output_directory="{output.dir}" \
-                title="latest_reuse"
+                title="latest_reuse" \
+            --all-temp
                 
         echo $(date) > {output.flag}
         
@@ -147,15 +149,7 @@ rule latest:
                 output_directory="{output.dir}" \
                 title="latest_reuse" \
             --conda-prefix $set_conda_prefix \
-            --until downloads
-        
-        {output.dir}/CompareM2-master/comparem2 \
-            --cores {threads} \
-            --config \
-                input_genomes="${{fnas}}/*.fna" \
-                output_directory="{output.dir}" \
-                title="latest_reuse" \
-            --conda-prefix $set_conda_prefix
+            --all-temp
         
         echo $(date) > {output.flag}
     
@@ -188,7 +182,7 @@ rule conda_stable:
         
         export COMPAREM2_PROFILE="$(dirname $(realpath $(which comparem2)))/profile/conda/default"
         
-        # First downloads
+
         comparem2 \
             --cores {threads} \
             --config \
@@ -196,16 +190,8 @@ rule conda_stable:
                 output_directory="{output.dir}" \
                 title="conda_stable" \
             --conda-prefix $set_conda_prefix \
-            --until downloads
+            --all-temp
             
-        # Then everything
-        comparem2 \
-            --cores {threads} \
-            --config \
-                input_genomes="fnas/E._faecium_4/*.fna" \
-                output_directory="{output.dir}" \
-                title="conda_stable" \
-            --conda-prefix $set_conda_prefix 
             
         echo $(date) > {output.flag}
             
