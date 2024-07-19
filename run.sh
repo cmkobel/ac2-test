@@ -4,7 +4,7 @@ IFS=$'\n\t'
 
 
 
-source activate comparem2-ci
+echo "Info: Expecting conda environment comparem2-ci to be activated already."
 
 snakemake --profile profile/default --until $1 --forcerun $1
 
