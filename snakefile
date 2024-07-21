@@ -155,7 +155,7 @@ rule latest:
 # 3)
 rule conda_stable:
     output:
-        "3_done.flag",
+        flag = "3_done.flag",
         dir = directory("out/3_conda_stable")
     threads: 16
     shell: """
