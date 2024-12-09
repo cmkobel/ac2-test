@@ -92,12 +92,14 @@ rule latest_reuse:
                 
         # Install environment.
         mamba env create -y -f {output.dir}/CompareM2-master/environment.yaml -n ac2_ci_conda_latest_reuse
-        source activate ac2_ci_conda_latest_reuse
+        cat {output.dir}/CompareM2-master/environment.yaml
+        #source activate ac2_ci_conda_latest_reuse
 
         export COMPAREM2_PROFILE="$(realpath {output.dir}/CompareM2-master/profile/conda/default)"
         
-        {output.dir}/CompareM2-master/comparem2 --version
-        {output.dir}/CompareM2-master/comparem2 \
+        mamba run -n ac2_ci_conda_latest_reuse python --version
+        mamba run -n ac2_ci_conda_latest_reuse {output.dir}/CompareM2-master/comparem2 --version
+        mamba run -n ac2_ci_conda_latest_reuse {output.dir}/CompareM2-master/comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
@@ -135,12 +137,12 @@ rule latest:
                 
         # Install environment.
         mamba env create -y -f {output.dir}/CompareM2-master/environment.yaml -n ac2_ci_conda_latest_reuse
-        source activate ac2_ci_conda_latest_reuse
+        #source activate ac2_ci_conda_latest_reuse
 
         export COMPAREM2_PROFILE="$(realpath {output.dir}/CompareM2-master/profile/conda/default)"
         
-        {output.dir}/CompareM2-master/comparem2 --version
-        {output.dir}/CompareM2-master/comparem2 \
+        mamba run -n ac2_ci_conda_latest_reuse {output.dir}/CompareM2-master/comparem2 --version
+        mamba run -n ac2_ci_conda_latest_reuse {output.dir}/CompareM2-master/comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
@@ -149,6 +151,11 @@ rule latest:
             --conda-prefix $set_conda_prefix 
         
         echo $(date) > {output.flag}
+        
+        
+        
+
+
     
     """
 
