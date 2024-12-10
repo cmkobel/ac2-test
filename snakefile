@@ -104,6 +104,8 @@ rule latest_reuse:
                 
         echo $(date) > {output.flag}
         
+        echo SUCCESSFULLY COMPLETED {rule}
+        
     """
 
 # 2)
@@ -235,7 +237,10 @@ rule apptainer:
             --config \
                 input_genomes="fnas/E._faecium_4/*.fna" \
                 output_directory="{output.dir}" \
-                title="apptainer"
+                title="apptainer" \
+            --omit-from antismash
+            
+        # Antismash unfortunately does not work on apptainer yet, so I'm omitting it from this CI run.
         
         echo $(date) > {output.flag}
         
