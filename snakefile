@@ -97,6 +97,7 @@ rule conda_latest_reuse:
         source activate ac2_ci_conda_latest_reuse
         export COMPAREM2_PROFILE="$(realpath {output.dir}/CompareM2-master/profile/conda/default)"
 
+        {output.dir}/CompareM2-master/comparem2 --version
         {output.dir}/CompareM2-master/comparem2 \
             --cores {threads} \
             --config \
@@ -187,21 +188,14 @@ rule conda_stable: # aka release
         source activate cm2_ci_conda_stable
         
         comparem2 --version
-            
-        # Set up database
-        #test -d {output.dir}/dynamic_db_stable && rm -r {output.dir}/dynamic_db_stable
-        #mkdir -p {output.dir}/dynamic_db_stable
-        #export COMPAREM2_DATABASES="$(realpath {output.dir}/dynamic_db_stable)"
         
         # Set up variables. 
         mkdir -p {output.dir}/conda_prefix
         set_conda_prefix=$(realpath {output.dir}/conda_prefix)
         mkdir -p {output.dir}/db
         export COMPAREM2_DATABASES="$(realpath {output.dir}/db)"
-        
         export COMPAREM2_PROFILE="$(dirname $(realpath $(which comparem2)))/profile/conda/default"
         
-
         comparem2 \
             --cores {threads} \
             --config \
