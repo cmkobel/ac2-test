@@ -15,8 +15,8 @@ mamba env create -f environment.yaml
 mamba activate comparem2-ci
 
 # snakemake --profile profile/default --until all
-snakemake --profile profile/default --until latest_reuse
-# snakemake --profile profile/default --until latest
+snakemake --profile profile/default --until conda_latest_reuse
+# snakemake --profile profile/default --until conda_latest
 # snakemake --profile profile/default --until conda_stable
 # snakemake --profile profile/default --until apptainer
 

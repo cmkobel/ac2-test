@@ -29,10 +29,11 @@ rule all:
         "4_done.flag", # apptainer
         
 
+# --- conda ---------------------------------------------------------
 
 # 0)
-# Like latest_reuse but fast
-rule fast:
+# Like latest_reuse but only fast
+rule conda_latest_reuse_fast:
     output:
         flag = "0_done.flag",
         dir = directory("out/0_fast")
@@ -50,10 +51,9 @@ rule fast:
         # Set up variables.
         fnas=$(realpath fnas/E._faecium_4)         
                 
-        # Install environment.
+        # Setup environment.
         mamba env create -y -f {output.dir}/CompareM2-master/environment.yaml -n ac2_ci_fast
         source activate ac2_ci_fast
-
         export COMPAREM2_PROFILE="$(realpath {output.dir}/CompareM2-master/profile/conda/default)"
         
         {output.dir}/CompareM2-master/comparem2 --version
@@ -67,12 +67,14 @@ rule fast:
             
         echo $(date) > {output.flag}
         
+        echo SUCCESSFULLY COMPLETED {rule}
+        
     """
 
 # 1)
 # Latest "development" version on github (branch master)
 # Reuses the default conda prefix and databases which are probably already set up on the developing machine.
-rule latest_reuse:
+rule conda_latest_reuse:
     output:
         flag = "1_done.flag",
         dir = directory("out/1_latest_reuse")
@@ -90,11 +92,18 @@ rule latest_reuse:
         # Set up variables.
         fnas=$(realpath fnas/E._faecium_4)         
                 
-        # Install environment.
+        # Setup environment
         mamba env create -y -f {output.dir}/CompareM2-master/environment.yaml -n ac2_ci_conda_latest_reuse
         source activate ac2_ci_conda_latest_reuse
         export COMPAREM2_PROFILE="$(realpath {output.dir}/CompareM2-master/profile/conda/default)"
 
+        {output.dir}/CompareM2-master/comparem2 \
+            --cores {threads} \
+            --config \
+                input_genomes="${{fnas}}/*.fna" \
+                output_directory="{output.dir}" \
+            --until fast
+                
         {output.dir}/CompareM2-master/comparem2 \
             --cores {threads} \
             --config \
@@ -110,7 +119,7 @@ rule latest_reuse:
 
 # 2)
 # Same as "latest_reuse" but including database downloads and fresh conda
-rule latest:
+rule conda_latest:
     output:
         flag = "2_done.flag",
         dir = directory("out/2_latest")
@@ -135,12 +144,23 @@ rule latest:
                 
         # Install environment.
         mamba env create -y -f {output.dir}/CompareM2-master/environment.yaml -n ac2_ci_conda_latest_reuse
-        #source activate ac2_ci_conda_latest_reuse
-
+        source activate ac2_ci_conda_latest_reuse
         export COMPAREM2_PROFILE="$(realpath {output.dir}/CompareM2-master/profile/conda/default)"
         
-        mamba run -n ac2_ci_conda_latest_reuse {output.dir}/CompareM2-master/comparem2 --version
-        mamba run -n ac2_ci_conda_latest_reuse {output.dir}/CompareM2-master/comparem2 \
+        {output.dir}/CompareM2-master/comparem2 --version
+        
+        
+        {output.dir}/CompareM2-master/comparem2 \
+            --cores {threads} \
+            --config \
+                input_genomes="${{fnas}}/*.fna" \
+                output_directory="{output.dir}" \
+                title="latest_reuse" \
+            --until fast \
+            --conda-prefix $set_conda_prefix 
+        
+        
+        {output.dir}/CompareM2-master/comparem2 \
             --cores {threads} \
             --config \
                 input_genomes="${{fnas}}/*.fna" \
@@ -149,16 +169,13 @@ rule latest:
             --conda-prefix $set_conda_prefix 
         
         echo $(date) > {output.flag}
-        
-        
-        
-
-
+                
+        echo SUCCESSFULLY COMPLETED {rule}
     
     """
 
 # 3)
-rule conda_stable:
+rule conda_stable: # aka release
     output:
         flag = "3_done.flag",
         dir = directory("out/3_conda_stable")
@@ -196,13 +213,21 @@ rule conda_stable:
             
         echo $(date) > {output.flag}
             
-        
+        echo SUCCESSFULLY COMPLETED {rule}    
     
     """
     
-    
-# 4)
-rule apptainer:
+# --- Apptainer -----------------------------------------------------
+
+# 4
+#rule apptainer_latest_fast:
+
+# 5
+#rule apptainer_latest: #aka release
+
+
+# 6)
+rule apptainer_stable:
     output:
         flag = "4_done.flag",
         dir = directory("out/4_apptainer")
@@ -211,8 +236,15 @@ rule apptainer:
     
         # Make sure that apptainer exists for this test.
         apptainer --version
+    
+        # Prepare output directory.
+        mkdir -p {output.dir}
+        rm -r {output.dir}/* || echo "{output.dir} is already empty"
+
+        # Set up variables.
+        fnas=$(realpath fnas/E._faecium_4) 
         
-        # Create conda environment.
+        # Setup environment
         mamba create -y -c conda-forge -c bioconda -n cm2_ci_apptainer comparem2
         source activate cm2_ci_apptainer
         
@@ -227,7 +259,17 @@ rule apptainer:
         comparem2 \
             --cores {threads} \
             --config \
-                input_genomes="fnas/E._faecium_4/*.fna" \
+                input_genomes="${{fnas}}/*.fna" \
+                output_directory="{output.dir}" \
+                title="apptainer" \
+            --until fast
+            
+        echo FAST SUCCESSFULLY FINISHED
+        
+        comparem2 \
+            --cores {threads} \
+            --config \
+                input_genomes="${{fnas}}/*.fna" \
                 output_directory="{output.dir}" \
                 title="apptainer" \
             --until downloads
@@ -235,7 +277,7 @@ rule apptainer:
         comparem2 \
             --cores {threads} \
             --config \
-                input_genomes="fnas/E._faecium_4/*.fna" \
+                input_genomes="${{fnas}}/*.fna" \
                 output_directory="{output.dir}" \
                 title="apptainer" \
             --omit-from antismash
@@ -244,7 +286,10 @@ rule apptainer:
         
         echo $(date) > {output.flag}
         
+        echo SUCCESSFULLY COMPLETED {rule}
+        
     """
+
 
 
 
